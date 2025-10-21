@@ -56,19 +56,29 @@
         </tbody>
     </table>
 
-    @if($graficoPrograma)
-    <div class="grafico">
-        <h2>Presupuesto por Código de Programa</h2>
-        <img src="{{ $graficoPrograma }}" alt="Gráfico Programa">
-    </div>
+    @if($graficoPrograma || $graficoEconomico)
+    <table width="100%" style="margin-top: 20px; text-align: center; border-collapse: collapse; border: none;">
+        <tr>
+            @if($graficoPrograma)
+            <td width="50%" style="vertical-align: top; text-align: center; border: none;">
+                <h3 style="font-size: 13px; margin-bottom: 5px;">Presupuesto por Código de Programa</h3>
+                <img src="{{ $graficoPrograma }}" alt="Gráfico Programa" style="width: 80%; height: auto; display: block; margin: 0 auto;">
+            </td>
+            @endif
+
+            @if($graficoEconomico)
+            <td width="50%" style="vertical-align: top; text-align: center; border: none;">
+                <h3 style="font-size: 13px; margin-bottom: 5px;">Presupuesto por Código Económico</h3>
+                <img src="{{ $graficoEconomico }}" alt="Gráfico Económico" style="width: 80%; height: auto; display: block; margin: 0 auto;">
+            </td>
+            @endif
+        </tr>
+    </table>
     @endif
 
-    @if($graficoEconomico)
-    <div class="grafico">
-        <h2>Presupuesto por Código Económico</h2>
-        <img src="{{ $graficoEconomico }}" alt="Gráfico Económico">
-    </div>
-    @endif
+
+
+
 
 </body>
 </html>
