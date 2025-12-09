@@ -123,6 +123,28 @@
             </div>
             
         </form>
+
+        <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-gray-200">
+            
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Comparativa Anual</h3>
+                <div id="selector-grafico" class="inline-flex rounded-md shadow-sm">
+                    <button type="button" data-type="line" 
+                            class="btn-graph-type px-3 py-1 text-xs font-medium border border-gray-300 rounded-l-md bg-sky-500 text-white hover:bg-sky-600 transition">
+                        📈 Línea
+                    </button>
+                    <button type="button" data-type="bar" 
+                            class="btn-graph-type px-3 py-1 text-xs font-medium border border-gray-300 rounded-r-md bg-white text-gray-700 hover:bg-gray-100 transition">
+                        📊 Barras
+                    </button>
+                </div>
+            </div>
+            
+            <div class="h-40">
+                <canvas id="graficoModal"></canvas>
+            </div>
+        </div>
+        
     </div>
 </div>
 
@@ -338,6 +360,14 @@ tablaBody.addEventListener('click', e=>{
     document.getElementById('CR_INIC_2025').value = cells[4].textContent.replace(/\./g,'').replace(',','.');
     document.getElementById('VARIACION').value = cells[5].textContent.replace('+','').replace('%','').trim();
 
+    // Obtenemos los valores limpios para la gráfica
+    // Quitamos los puntos de miles y cambiamos coma por punto
+    let valor2024 = parseFloat(cells[3].textContent.replace(/\./g,'').replace(',','.')) || 0;
+    let valor2025 = parseFloat(cells[4].textContent.replace(/\./g,'').replace(',','.')) || 0;
+
+    // 👇 LLAMADA NUEVA AQUÍ
+    actualizarGraficoModal(valor2024, valor2025);
+
     // 👇 mostrar botón de eliminar SOLO en modo edición
     document.getElementById('btn-eliminar').classList.remove('hidden');
 
@@ -513,6 +543,100 @@ document.querySelectorAll('th.sortable').forEach(th => {
 cargarGraficoPrograma();
 
 
+// Graficos de comparativa anual en el modal
+
+let chartModal = null; 
+let currentChartType = 'line'; // Estado inicial: Línea
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Escucha clics en los botones de tipo de gráfico
+    document.querySelectorAll('.btn-graph-type').forEach(button => {
+        button.addEventListener('click', function() {
+            const newType = this.dataset.type;
+            
+            // 1. Actualizar el estado global
+            currentChartType = newType;
+            
+            // 2. Cambiar la apariencia de los botones
+            document.querySelectorAll('.btn-graph-type').forEach(btn => {
+                if (btn.dataset.type === newType) {
+                    btn.classList.add('bg-sky-500', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                } else {
+                    btn.classList.remove('bg-sky-500', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-700');
+                }
+            });
+
+            // 3. Volver a dibujar el gráfico con el nuevo tipo (usando los datos actuales del modal)
+            const val2024 = parseFloat(document.getElementById('CR_INIC_2024').value) || 0;
+            const val2025 = parseFloat(document.getElementById('CR_INIC_2025').value) || 0;
+            
+            actualizarGraficoModal(val2024, val2025);
+        });
+    });
+});
+
+
+function actualizarGraficoModal(val2024, val2025) {
+    const ctx = document.getElementById('graficoModal').getContext('2d');
+
+    if (chartModal) {
+        chartModal.destroy();
+    }
+
+    const colorTendencia = val2025 >= val2024 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'; // Verde o Rojo
+    
+    // --- Configuración del Dataset ---
+    const datasetConfig = {
+        label: 'Crédito Presupuestario (€)',
+        data: [val2024, val2025],
+        backgroundColor: currentChartType === 'bar' ? [ 'rgba(156, 163, 175, 0.5)', colorTendencia ] : colorTendencia,
+        borderColor: colorTendencia,
+        borderWidth: 3,
+        // Propiedades específicas del tipo de gráfico
+        tension: currentChartType === 'line' ? 0.2 : 0,
+        pointRadius: currentChartType === 'line' ? 6 : 0,
+        fill: false,
+        borderRadius: currentChartType === 'bar' ? 5 : 0,
+        barPercentage: currentChartType === 'bar' ? 0.6 : 1,
+    };
+
+
+    chartModal = new Chart(ctx, {
+        type: currentChartType, // 👈 Usa el tipo de gráfico seleccionado
+        data: {
+            labels: ['2024', '2025'],
+            datasets: [datasetConfig]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            // Solo usar el eje Y si es un gráfico de barras (para vertical)
+            indexAxis: currentChartType === 'bar' ? 'x' : 'x', 
+            
+            plugins: {
+                legend: { display: currentChartType === 'line' }, // Mostramos leyenda solo en línea (para claridad)
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.toLocaleString('es-ES')} €`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { display: true, color: '#f3f4f6' }
+                }
+            }
+        }
+    });
+}
 
 </script>
 
