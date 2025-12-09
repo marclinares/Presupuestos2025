@@ -185,8 +185,6 @@ async function buscarGastos(page = 1) {
 
     renderPagination(current, last);
 
-    // 👉 Actualizar gráfico circular
-    actualizarGrafico(datos);
 }
 
 
@@ -414,19 +412,37 @@ async function cargarGrafico() {
     const sort = sortCampo;
     const dir = sortDireccion;
 
-    // Ruta correcta para código económico
     const response = await fetch(`/gastos/chart-data/economico?q=${encodeURIComponent(q)}&sort=${sort}&dir=${dir}`);
     const data = await response.json();
 
     const labels = data.map(item => item.codigo_economico);
-    const values = data.map(item => item.total);
+    // Aseguramos que los valores sean números desde el principio
+    const values = data.map(item => parseFloat(item.total) || 0);
 
     const ctx = document.getElementById('graficoEconomico').getContext('2d');
     if (window.chartEconomico) window.chartEconomico.destroy();
+    
     window.chartEconomico = new Chart(ctx, {
         type: 'pie',
         data: { labels, datasets: [{ data: values }] },
-        options: { plugins: { tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.toLocaleString()} €` } } } }
+        options: { 
+            plugins: { 
+                tooltip: { 
+                    callbacks: { 
+                        label: function(context) {
+                            let value = context.parsed;
+                            // Sumamos asegurándonos de que son números
+                            let total = context.dataset.data.reduce((a, b) => a + (parseFloat(b) || 0), 0);
+                            
+                            // Evitamos división por cero
+                            let percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                            
+                            return `${context.label}: ${value.toLocaleString('es-ES')} € (${percentage})`;
+                        } 
+                    } 
+                } 
+            } 
+        }
     });
 }
 
@@ -450,7 +466,8 @@ async function cargarGraficoPrograma() {
     const data = await response.json();
 
     const labels = data.map(item => item.codigo_programa);
-    const values = data.map(item => item.total);
+    // Aseguramos que los valores sean números desde el principio
+    const values = data.map(item => parseFloat(item.total) || 0);
 
     if (window.chartPrograma) {
         window.chartPrograma.destroy();
@@ -469,10 +486,15 @@ async function cargarGraficoPrograma() {
             plugins: {
                 tooltip: {
                     callbacks: {
-                        label: (context) => {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            return `${label}: ${value.toLocaleString()} €`;
+                        label: function(context) {
+                            let value = context.parsed || 0;
+                            // Sumamos asegurándonos de que son números
+                            let total = context.dataset.data.reduce((a, b) => a + (parseFloat(b) || 0), 0);
+
+                            // Evitamos división por cero
+                            let percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+
+                            return `${context.label}: ${value.toLocaleString('es-ES')} € (${percentage})`;
                         }
                     }
                 }

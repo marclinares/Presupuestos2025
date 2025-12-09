@@ -76,9 +76,6 @@
     </table>
     @endif
 
-
-
-
-
+    
 </body>
 </html>
