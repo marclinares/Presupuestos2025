@@ -64,8 +64,15 @@
 
 <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 relative border border-sky-100">
+
         <h2 class="text-2xl font-bold text-sky-700 mb-6">✏️ Editar Gasto Presupuestario</h2>
 
+        <button id="btn-cerrar-x" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 hover:rotate-90 transition-all duration-300 focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
         <form id="form-editar" class="space-y-5">
             <input type="hidden" id="gasto-id">
 
@@ -377,6 +384,7 @@ tablaBody.addEventListener('click', e=>{
 
 // Cerrar modal
 document.getElementById('btn-cerrar').addEventListener('click', ()=> modal.classList.add('hidden'));
+document.getElementById('btn-cerrar-x').addEventListener('click', () => modal.classList.add('hidden'));
 
 // Guardar cambios
 formEditar.addEventListener('submit', async e => {
