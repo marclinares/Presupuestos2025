@@ -453,7 +453,7 @@
                 });
 
                 // Ordenación de columnas
-                document.querySelectorAll('th.sortable').forEach(th => {
+                document.querySelectorAll('th.th-sortable').forEach(th => {
                     th.addEventListener('click', () => this.handleSort(th));
                 });
 
