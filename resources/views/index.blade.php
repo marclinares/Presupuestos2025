@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Buscador de Gastos 2025 - Ayuntamiento</title>
+    <title>Buscador de Gastos 2026 - Ayuntamiento</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -77,7 +77,6 @@
 
 <div class="max-w-7xl mx-auto">
 
-    <!-- Header -->
     <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 p-6 rounded-2xl glass-effect shadow-xl animate-fadeIn">
         <div class="flex items-center gap-4">
             <div class="relative">
@@ -86,7 +85,7 @@
             </div>
             <div>
                 <h2 class="text-xl font-bold text-gray-800">Ayuntamiento Almussafes</h2>
-                <p class="text-sm text-gray-600">Gestión Presupuestaria 2025</p>
+                <p class="text-sm text-gray-600">Gestión Presupuestaria 2026</p>
             </div>
         </div>
         <div class="flex flex-wrap gap-3">
@@ -99,7 +98,6 @@
         </div>
     </header>
 
-    <!-- Título -->
     <div class="text-center mb-12 animate-fadeIn" style="animation-delay:0.1s">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             <span class="bg-gradient-to-r from-sky-600 to-blue-800 bg-clip-text text-transparent">
@@ -107,11 +105,10 @@
             </span>
         </h1>
         <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-            Visualiza, analiza y gestiona los gastos presupuestarios del año 2025 de forma interactiva
+            Visualiza, analiza y gestiona los gastos presupuestarios del año 2026 de forma interactiva
         </p>
     </div>
 
-    <!-- Búsqueda -->
     <div class="relative mb-12 max-w-3xl mx-auto animate-fadeIn" style="animation-delay:0.2s">
         <div class="absolute left-5 top-1/2 transform -translate-y-1/2 text-sky-500 text-xl">
             <i class="fas fa-search"></i>
@@ -125,7 +122,6 @@
         />
     </div>
 
-    <!-- Gráficos -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         <div class="card animate-fadeIn" style="animation-delay:0.3s">
             <div class="p-6 border-b border-gray-100">
@@ -151,7 +147,6 @@
         </div>
     </div>
 
-    <!-- Tabla -->
     <div class="card overflow-hidden mb-8 animate-fadeIn" style="animation-delay:0.5s">
         <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
             <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -184,14 +179,20 @@
                         </th>
                         <th data-campo="CR_INIC_2024" class="th-sortable text-right" scope="col">
                             <div class="flex items-center justify-end gap-2">
-                                <i class="fas fa-euro-sign text-gray-500"></i>
+                                <i class="fas fa-euro-sign text-gray-400"></i>
                                 2024 (€) <span class="sort-icon"></span>
                             </div>
                         </th>
                         <th data-campo="CR_INIC_2025" class="th-sortable text-right" scope="col">
                             <div class="flex items-center justify-end gap-2">
-                                <i class="fas fa-euro-sign text-blue-500"></i>
+                                <i class="fas fa-euro-sign text-gray-500"></i>
                                 2025 (€) <span class="sort-icon"></span>
+                            </div>
+                        </th>
+                        <th data-campo="CR_INIC_2026" class="th-sortable text-right" scope="col">
+                            <div class="flex items-center justify-end gap-2">
+                                <i class="fas fa-euro-sign text-blue-500"></i>
+                                2026 (€) <span class="sort-icon"></span>
                             </div>
                         </th>
                         <th data-campo="VARIACION" class="th-sortable text-right" scope="col">
@@ -218,17 +219,14 @@
         </div>
     </div>
 
-    <!-- Paginación -->
     <div id="paginacion" class="flex flex-wrap justify-center items-center gap-2 mb-12 animate-fadeIn" style="animation-delay:0.6s"></div>
 
-    <!-- Footer -->
     <footer class="text-center text-gray-500 text-sm py-6 border-t border-gray-200 mt-8">
-        <p>Sistema de Gestión Presupuestaria © 2025 • Última actualización: <span id="current-date"></span></p>
+        <p>Sistema de Gestión Presupuestaria © 2026 • Última actualización: <span id="current-date"></span></p>
         <p class="mt-1">Total registros: <span id="total-records" class="font-semibold text-sky-600">0</span></p>
     </footer>
 </div>
 
-<!-- Modal edición -->
 <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-gray-200 animate-fadeIn">
         <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-blue-50">
@@ -274,37 +272,43 @@
                     <textarea id="APLICACION_PRESUPUESTARIA" rows="3" class="w-full input-std resize-none"></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label for="CR_INIC_2024" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-calendar-alt text-gray-500 mr-1"></i> Crédito 2024 (€)
+                            <i class="fas fa-calendar-alt text-gray-400 mr-1"></i> Crédito 2024 (€)
                         </label>
                         <input type="number" step="0.01" min="0" id="CR_INIC_2024" class="input-std">
                         <p class="text-red-500 text-xs mt-1 hidden" id="err-c24">Debe ser un número positivo</p>
                     </div>
                     <div>
                         <label for="CR_INIC_2025" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-calendar-alt text-blue-500 mr-1"></i> Crédito 2025 (€)
+                            <i class="fas fa-calendar-alt text-gray-500 mr-1"></i> Crédito 2025 (€)
                         </label>
                         <input type="number" step="0.01" min="0" id="CR_INIC_2025" class="input-std">
                         <p class="text-red-500 text-xs mt-1 hidden" id="err-c25">Debe ser un número positivo</p>
+                    </div>
+                    <div>
+                        <label for="CR_INIC_2026" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-calendar-alt text-blue-500 mr-1"></i> Crédito 2026 (€)
+                        </label>
+                        <input type="number" step="0.01" min="0" id="CR_INIC_2026" class="input-std">
+                        <p class="text-red-500 text-xs mt-1 hidden" id="err-c26">Debe ser un número positivo</p>
                     </div>
                 </div>
 
                 <div>
                     <label for="VARIACION" class="block text-sm font-semibold text-gray-700 mb-2">
                         <i class="fas fa-percentage text-purple-500 mr-1"></i> Variación (%)
-                        <span class="text-xs text-gray-400 font-normal ml-1">(se calcula automáticamente)</span>
+                        <span class="text-xs text-gray-400 font-normal ml-1">(25 vs 26, auto-calculada)</span>
                     </label>
                     <input type="text" id="VARIACION" class="input-std bg-gray-50" readonly
                            aria-label="Variación calculada automáticamente">
                 </div>
 
-                <!-- Gráfico comparativo -->
                 <div class="mt-6 p-5 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-200">
                     <div class="flex flex-wrap justify-between items-center mb-4">
                         <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fas fa-chart-line text-sky-600"></i> Comparativa Anual
+                            <i class="fas fa-chart-line text-sky-600"></i> Evolución Anual
                         </h3>
                         <div class="inline-flex rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                             <button type="button" data-type="line" class="btn-graph-type px-4 py-2 text-sm font-medium border-r border-gray-200 bg-sky-500 text-white flex items-center gap-2">
@@ -334,7 +338,6 @@
     </div>
 </div>
 
-<!-- Modal de confirmación personalizado (reemplaza confirm()) -->
 <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-[60]">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-fadeIn">
         <div class="flex items-center gap-3 mb-4">
@@ -356,20 +359,6 @@
 </div>
 
 <script>
-    /**
-     * CORRECCIONES APLICADAS:
-     * 1. [SEGURIDAD]     renderTable() — eliminado innerHTML con datos del servidor. Se usa createElement + textContent.
-     * 2. [BUG]           handleSort()  — selector corregido de 'th.sortable' a 'th.th-sortable'.
-     * 3. [LÓGICA]        openModal()   — lee datos desde atributos data-* en lugar de parsear el DOM visual.
-     * 4. [LÓGICA]        VARIACION     — se recalcula automáticamente al cambiar CR_INIC_2024 o CR_INIC_2025.
-     * 5. [UX]            handleDelete()— reemplazado confirm() nativo por modal de confirmación personalizado.
-     * 6. [RENDIMIENTO]   paginación    — no recarga gráficos al paginar, solo al buscar/ordenar.
-     * 7. [VALIDACIÓN]    handleSave()  — validación extendida (tipos, rangos negativos, mensajes de error visibles).
-     * 8. [ACCESIBILIDAD] Filas de tabla — añadido tabindex="0" y soporte teclado (Enter/Space).
-     * 9. [HTML]          btn-pdf — cambiado de <a> a <button> para evitar href="#" y manejar el export por JS.
-     * 10.[HTML]          Etiquetas <label for="..."> vinculadas correctamente a sus inputs.
-     */
-
     const ExpenseManager = {
         state: {
             page: 1,
@@ -422,6 +411,7 @@
                     app:  document.getElementById('APLICACION_PRESUPUESTARIA'),
                     c24:  document.getElementById('CR_INIC_2024'),
                     c25:  document.getElementById('CR_INIC_2025'),
+                    c26:  document.getElementById('CR_INIC_2026'),
                     var:  document.getElementById('VARIACION'),
                 },
                 errors: {
@@ -429,13 +419,13 @@
                     econ: document.getElementById('err-econ'),
                     c24:  document.getElementById('err-c24'),
                     c25:  document.getElementById('err-c25'),
+                    c26:  document.getElementById('err-c26'),
                 },
                 csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             };
         },
 
         bindEvents() {
-            // Buscador con debounce
             this.dom.inputSearch.addEventListener('input', (e) => {
                 clearTimeout(this.state.debounceTimer);
                 this.dom.inputSearch.classList.add('ring-2', 'ring-sky-300');
@@ -444,7 +434,7 @@
                     this.state.search = e.target.value;
                     this.state.page = 1;
                     this.dom.inputSearch.classList.remove('ring-2', 'ring-sky-300');
-                    this.loadData(); // recarga tabla + gráficos al buscar
+                    this.loadData();
                 }, 400);
             });
 
@@ -457,30 +447,26 @@
                 }
             });
 
-            // Ordenación
             document.querySelectorAll('th.th-sortable').forEach(th => {
                 th.addEventListener('click', () => this.handleSort(th));
             });
 
-            // Paginación (delegación de eventos) — solo recarga tabla, no gráficos
             this.dom.paginacion.addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-page]');
                 if (btn) {
                     const page = parseInt(btn.dataset.page);
                     if (page) {
                         this.state.page = page;
-                        this.fetchGastos(); // ← solo tabla, no gráficos
+                        this.fetchGastos(); 
                     }
                 }
             });
 
-            // Click en fila de tabla
             this.dom.tablaBody.addEventListener('click', (e) => {
                 const row = e.target.closest('tr[data-id]');
                 if (row) this.openModal(row);
             });
 
-            // Teclado en filas de tabla (accesibilidad)
             this.dom.tablaBody.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     const row = e.target.closest('tr[data-id]');
@@ -491,10 +477,8 @@
                 }
             });
 
-            // Nuevo gasto
             this.dom.btnNuevo.addEventListener('click', () => this.openModal(null));
 
-            // Cerrar modal principal
             [this.dom.btnCerrar, this.dom.btnCerrarX].forEach(btn => {
                 btn.addEventListener('click', () => this.closeModal());
             });
@@ -503,13 +487,10 @@
                 if (e.target === this.dom.modal) this.closeModal();
             });
 
-            // Guardar
             this.dom.formEditar.addEventListener('submit', (e) => this.handleSave(e));
 
-            // Eliminar — abre el modal de confirmación personalizado
             this.dom.btnEliminar.addEventListener('click', () => this.showConfirmModal());
 
-            // Botones del modal de confirmación
             this.dom.confirmOk.addEventListener('click', () => {
                 this.dom.confirmModal.classList.add('hidden');
                 this.handleDelete();
@@ -518,10 +499,8 @@
                 this.dom.confirmModal.classList.add('hidden');
             });
 
-            // Exportar PDF
             this.dom.btnPdf.addEventListener('click', () => this.handlePdfExport());
 
-            // Cambiar tipo de gráfico modal
             document.querySelectorAll('.btn-graph-type').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const target = e.target.closest('[data-type]');
@@ -533,8 +512,7 @@
                 });
             });
 
-            // CORRECCIÓN: Recalcular VARIACION automáticamente al cambiar créditos
-            [this.dom.inputsForm.c24, this.dom.inputsForm.c25].forEach(input => {
+            [this.dom.inputsForm.c24, this.dom.inputsForm.c25, this.dom.inputsForm.c26].forEach(input => {
                 input.addEventListener('input', () => {
                     this.recalcVariacion();
                     this.renderModalChart();
@@ -542,19 +520,17 @@
             });
         },
 
-        // Recalcula la variación a partir de los créditos introducidos
         recalcVariacion() {
-            const v24 = parseFloat(this.dom.inputsForm.c24.value) || 0;
             const v25 = parseFloat(this.dom.inputsForm.c25.value) || 0;
-            if (v24 === 0) {
+            const v26 = parseFloat(this.dom.inputsForm.c26.value) || 0;
+            if (v25 === 0) {
                 this.dom.inputsForm.var.value = '';
                 return;
             }
-            const variacion = (((v25 - v24) / v24) * 100).toFixed(2);
+            const variacion = (((v26 - v25) / v25) * 100).toFixed(2);
             this.dom.inputsForm.var.value = variacion;
         },
 
-        // Carga inicial: tabla + gráficos
         loadData() {
             this.showLoading();
             Promise.all([
@@ -602,7 +578,7 @@
                 this.dom.tablaBody.innerHTML = '';
                 const tr = document.createElement('tr');
                 const td = document.createElement('td');
-                td.colSpan = 6;
+                td.colSpan = 7;
                 td.className = 'px-5 py-8 text-center text-red-600';
                 td.textContent = 'Error al cargar los datos. Intenta nuevamente.';
                 tr.appendChild(td);
@@ -610,10 +586,6 @@
             }
         },
 
-        /**
-         * CORRECCIÓN 1 — XSS: se construye el DOM con createElement + textContent.
-         * CORRECCIÓN 3 — Los datos originales se guardan en data-* para leerlos en openModal().
-         */
         renderTable(data) {
             this.dom.tablaBody.innerHTML = '';
 
@@ -630,18 +602,17 @@
                 const tr = document.createElement('tr');
                 tr.className = 'table-row-hover group';
                 tr.dataset.id   = g.id;
-                // Guardar datos limpios en data-* para el modal
                 tr.dataset.prog = g.CODI_PROG;
                 tr.dataset.econ = g.CODI_ECON;
                 tr.dataset.app  = g.APLICACION_PRESUPUESTARIA;
                 tr.dataset.c24  = g.CR_INIC_2024;
                 tr.dataset.c25  = g.CR_INIC_2025;
+                tr.dataset.c26  = g.CR_INIC_2026;
                 tr.dataset.var  = g.VARIACION ?? '';
                 tr.setAttribute('tabindex', '0');
                 tr.setAttribute('role', 'button');
                 tr.setAttribute('aria-label', `Editar gasto ${g.CODI_PROG}`);
 
-                // Celda Programa
                 const tdProg = document.createElement('td');
                 tdProg.className = 'px-5 py-4 font-semibold text-gray-900 group-hover:text-sky-700';
                 const progWrap = document.createElement('div');
@@ -654,28 +625,27 @@
                 progWrap.appendChild(progText);
                 tdProg.appendChild(progWrap);
 
-                // Celda Económico
                 const tdEcon = document.createElement('td');
                 tdEcon.className = 'px-5 py-4 text-gray-700';
                 tdEcon.textContent = g.CODI_ECON;
 
-                // Celda Aplicación (truncada con title)
                 const tdApp = document.createElement('td');
                 tdApp.className = 'px-5 py-4 text-gray-600 max-w-xs truncate';
                 tdApp.title = g.APLICACION_PRESUPUESTARIA;
                 tdApp.textContent = g.APLICACION_PRESUPUESTARIA;
 
-                // Celda 2024
                 const td24 = document.createElement('td');
-                td24.className = 'px-5 py-4 text-right font-mono text-gray-500';
+                td24.className = 'px-5 py-4 text-right font-mono text-gray-400';
                 td24.textContent = this.formatMoney(g.CR_INIC_2024);
 
-                // Celda 2025
                 const td25 = document.createElement('td');
-                td25.className = 'px-5 py-4 text-right font-mono font-bold text-gray-900';
+                td25.className = 'px-5 py-4 text-right font-mono text-gray-500';
                 td25.textContent = this.formatMoney(g.CR_INIC_2025);
 
-                // Celda Variación
+                const td26 = document.createElement('td');
+                td26.className = 'px-5 py-4 text-right font-mono font-bold text-gray-900';
+                td26.textContent = this.formatMoney(g.CR_INIC_2026);
+
                 const tdVar = document.createElement('td');
                 tdVar.className = 'px-5 py-4 text-right';
                 const varSpan = document.createElement('span');
@@ -686,7 +656,7 @@
                 varSpan.appendChild(document.createTextNode(varText));
                 tdVar.appendChild(varSpan);
 
-                tr.append(tdProg, tdEcon, tdApp, td24, td25, tdVar);
+                tr.append(tdProg, tdEcon, tdApp, td24, td25, td26, tdVar);
                 this.dom.tablaBody.appendChild(tr);
             });
         },
@@ -749,9 +719,6 @@
             return rangeWithDots;
         },
 
-        /**
-         * CORRECCIÓN 2 — Selector corregido: 'th.th-sortable .sort-icon'
-         */
         handleSort(th) {
             const campo = th.dataset.campo;
 
@@ -762,12 +729,10 @@
                 this.state.sortDireccion = 'asc';
             }
 
-            // Limpiar todos los iconos
             document.querySelectorAll('th.th-sortable .sort-icon').forEach(s => {
                 s.innerHTML = '';
             });
 
-            // Actualizar el icono de la columna activa
             const icon = th.querySelector('.sort-icon');
             if (icon) {
                 icon.innerHTML = this.state.sortDireccion === 'asc'
@@ -778,27 +743,23 @@
             this.loadData();
         },
 
-        /**
-         * CORRECCIÓN 3 — openModal() lee datos desde data-* en lugar del DOM visual.
-         */
         openModal(row) {
             const f = this.dom.inputsForm;
             this.clearErrors();
 
             if (row) {
-                // Modo edición: datos limpios desde data-*
                 f.id.value   = row.dataset.id;
                 f.prog.value = row.dataset.prog;
                 f.econ.value = row.dataset.econ;
                 f.app.value  = row.dataset.app;
                 f.c24.value  = row.dataset.c24;
                 f.c25.value  = row.dataset.c25;
+                f.c26.value  = row.dataset.c26;
                 f.var.value  = row.dataset.var;
 
                 this.dom.btnEliminar.classList.remove('hidden');
                 this.dom.modalTitle.textContent = 'Editar Gasto Presupuestario';
             } else {
-                // Modo creación
                 f.id.value = '';
                 this.dom.formEditar.reset();
                 this.dom.btnEliminar.classList.add('hidden');
@@ -817,7 +778,6 @@
             if (show) {
                 this.dom.modal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
-                // Enfocar primer campo
                 setTimeout(() => this.dom.inputsForm.prog.focus(), 100);
             } else {
                 this.dom.modal.classList.add('hidden');
@@ -825,16 +785,10 @@
             }
         },
 
-        /**
-         * CORRECCIÓN 5 — Modal personalizado de confirmación en lugar de confirm().
-         */
         showConfirmModal() {
             this.dom.confirmModal.classList.remove('hidden');
         },
 
-        /**
-         * CORRECCIÓN 7 — Validación extendida: tipos, rangos negativos, mensajes visibles.
-         */
         validateForm() {
             const f = this.dom.inputsForm;
             let valid = true;
@@ -854,6 +808,10 @@
             }
             if (f.c25.value !== '' && parseFloat(f.c25.value) < 0) {
                 this.showError('c25', 'Debe ser un número positivo');
+                valid = false;
+            }
+            if (f.c26.value !== '' && parseFloat(f.c26.value) < 0) {
+                this.showError('c26', 'Debe ser un número positivo');
                 valid = false;
             }
 
@@ -894,6 +852,7 @@
                 APLICACION_PRESUPUESTARIA:f.app.value.trim(),
                 CR_INIC_2024:             parseFloat(f.c24.value) || 0,
                 CR_INIC_2025:             parseFloat(f.c25.value) || 0,
+                CR_INIC_2026:             parseFloat(f.c26.value) || 0,
                 VARIACION:                f.var.value.trim()
             };
 
@@ -951,6 +910,7 @@
             const params = `q=${encodeURIComponent(this.state.search)}&sort=${this.state.sortCampo}&dir=${this.state.sortDireccion}`;
 
             try {
+                // Peticiones simultáneas al backend
                 const [progRes, econRes] = await Promise.all([
                     fetch(`/gastos/chart-data/programa?${params}`),
                     fetch(`/gastos/chart-data/economico?${params}`)
@@ -959,8 +919,21 @@
                 const progData = await progRes.json();
                 const econData = await econRes.json();
 
-                this.renderMainChart('graficoPrograma', progData, 'codigo_programa', 'mainPrograma');
-                this.renderMainChart('graficoEconomico', econData, 'codigo_economico', 'mainEconomico');
+                // Transformar datos al formato { label, value } para los gráficos
+                const progChart = progData.map(item => ({
+                    label: item.codigo_programa,
+                    total: item.total_2026  // <--- Forzamos que 'total' sea el valor de 2026
+                }));
+
+                const econChart = econData.map(item => ({
+                    label: item.codigo_economico,
+                    total: item.total_2026  // <--- Forzamos que 'total' sea el valor de 2026
+                }));
+
+                // Pasar el "total" como clave
+                this.renderMainChart('graficoPrograma', progChart, 'label', 'mainPrograma');
+                this.renderMainChart('graficoEconomico', econChart, 'label', 'mainEconomico');
+
             } catch (error) {
                 console.error('Error cargando gráficos:', error);
                 this.renderEmptyCharts();
@@ -1032,13 +1005,14 @@
             const context = ctx.getContext('2d');
             const v24 = parseFloat(this.dom.inputsForm.c24.value) || 0;
             const v25 = parseFloat(this.dom.inputsForm.c25.value) || 0;
+            const v26 = parseFloat(this.dom.inputsForm.c26.value) || 0;
             const type = this.state.chartModalType;
 
             if (this.charts.modal) {
                 this.charts.modal.destroy();
             }
 
-            const isIncrease = v25 >= v24;
+            const isIncrease = v26 >= v25;
             const color = isIncrease ? '#10b981' : '#ef4444';
 
             let gradient = context.createLinearGradient(0, 0, 0, 200);
@@ -1053,12 +1027,12 @@
             this.charts.modal = new Chart(context, {
                 type,
                 data: {
-                    labels: ['2024', '2025'],
+                    labels: ['2024', '2025', '2026'],
                     datasets: [{
                         label: 'Presupuesto (€)',
-                        data: [v24, v25],
+                        data: [v24, v25, v26],
                         backgroundColor: type === 'bar'
-                            ? ['rgba(148,163,184,0.5)', gradient]
+                            ? ['rgba(148,163,184,0.5)', 'rgba(148,163,184,0.5)', gradient]
                             : gradient,
                         borderColor: color,
                         borderWidth: type === 'line' ? 3 : 0,
@@ -1104,7 +1078,6 @@
         },
 
         updatePdfLink() {
-            // Solo actualiza el estado interno; el export se gestiona por JS
             this._pdfParams = {
                 q:    this.state.search,
                 sort: this.state.sortCampo,
