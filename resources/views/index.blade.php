@@ -88,12 +88,28 @@
                 <p class="text-sm text-gray-600">Gestión Presupuestaria 2026</p>
             </div>
         </div>
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-wrap gap-4">
+            @guest
+            <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-xl bg-white border-2 border-blue-500 text-blue-600 font-bold hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 shadow-sm">
+                <i class="fas fa-user-lock"></i> Acceso Admin
+            </a>
+            @endguest
+
+            @auth
+            <form method="POST" action="{{ route('logout') }}" class="inline">
+                @csrf
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 shadow-sm border border-gray-200">
+                    <i class="fas fa-sign-out-alt"></i> Salir ({{ auth()->user()->name }})
+                </button>
+            </form>
+
             <button id="btn-nuevo" class="btn-primary">
-                <i class="fas fa-plus-circle"></i> Nuevo Presupuesto
+                <i class="fas fa-plus"></i> Nuevo Presupuesto
             </button>
-            <button id="btn-pdf" class="btn-secondary">
-                <i class="fas fa-file-pdf"></i> Exportar PDF
+            @endauth
+
+            <button id="btn-download-pdf" class="px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 hover:border-blue-300 transition-all duration-300 flex items-center gap-2 shadow-sm">
+                <i class="fas fa-file-pdf text-red-500"></i> Descargar PDF
             </button>
         </div>
     </header>
@@ -153,7 +169,9 @@
                 <i class="fas fa-table text-gray-600"></i>
                 Detalle de Gastos Presupuestarios
             </h3>
-            <p class="text-gray-600 text-sm mt-1">Haz clic en cualquier fila para editar los datos</p>
+            @auth
+                <p class="text-gray-600 text-sm mt-1">Haz clic en cualquier fila para editar los datos</p>
+            @endauth
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full text-left text-sm" id="tabla-gastos">
@@ -324,14 +342,17 @@
 
                 <div class="flex flex-wrap justify-end gap-4 pt-6 border-t border-gray-200 mt-8">
                     <button type="button" id="btn-cerrar" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all duration-300 flex items-center gap-2">
-                        <i class="fas fa-times"></i> Cancelar
+                        <i class="fas fa-times"></i> {{ auth()->check() ? 'Cancelar' : 'Cerrar' }}
                     </button>
+                    
+                    @auth
                     <button type="button" id="btn-eliminar" class="btn-danger hidden">
                         <i class="fas fa-trash-alt"></i> Eliminar
                     </button>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-save"></i> Guardar Cambios
                     </button>
+                    @endauth
                 </div>
             </form>
         </div>
@@ -360,6 +381,10 @@
 
 <script>
     const ExpenseManager = {
+
+        // Añade esta línea para que JS sepa si es admin o invitado
+        isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+
         state: {
             page: 1,
             search: '',
@@ -376,7 +401,12 @@
             modal: null
         },
 
-        dom: {},
+        dom: {
+            // ... otros elementos
+            btnNuevo: document.getElementById('btn-nuevo'), // Esto será null para invitados
+            btnDownloadPdf: document.getElementById('btn-download-pdf'),
+            // ...
+        },
 
         init() {
             this.cacheDOM();
@@ -394,7 +424,7 @@
                 confirmModal: document.getElementById('confirm-modal'),
                 formEditar:   document.getElementById('form-editar'),
                 btnNuevo:     document.getElementById('btn-nuevo'),
-                btnPdf:       document.getElementById('btn-pdf'),
+                btnPdf:       document.getElementById('btn-download-pdf'),
                 btnCerrar:    document.getElementById('btn-cerrar'),
                 btnCerrarX:   document.getElementById('btn-cerrar-x'),
                 btnEliminar:  document.getElementById('btn-eliminar'),
@@ -426,6 +456,7 @@
         },
 
         bindEvents() {
+
             this.dom.inputSearch.addEventListener('input', (e) => {
                 clearTimeout(this.state.debounceTimer);
                 this.dom.inputSearch.classList.add('ring-2', 'ring-sky-300');
@@ -477,7 +508,10 @@
                 }
             });
 
-            this.dom.btnNuevo.addEventListener('click', () => this.openModal(null));
+            // SOLO si el botón existe (estás logueado), se asigna el evento
+            if (this.dom.btnNuevo) {
+                this.dom.btnNuevo.addEventListener('click', () => this.openModal(null));
+            }
 
             [this.dom.btnCerrar, this.dom.btnCerrarX].forEach(btn => {
                 btn.addEventListener('click', () => this.closeModal());
@@ -487,9 +521,14 @@
                 if (e.target === this.dom.modal) this.closeModal();
             });
 
-            this.dom.formEditar.addEventListener('submit', (e) => this.handleSave(e));
-
-            this.dom.btnEliminar.addEventListener('click', () => this.showConfirmModal());
+            // Protegemos el submit del formulario
+            if (this.dom.formEditar) {
+                this.dom.formEditar.addEventListener('submit', (e) => this.handleSave(e));
+            }
+            // Solo añadimos el evento si el botón existe en el DOM
+            if (this.dom.btnEliminar) {
+                this.dom.btnEliminar.addEventListener('click', () => this.showConfirmModal());
+            }
 
             this.dom.confirmOk.addEventListener('click', () => {
                 this.dom.confirmModal.classList.add('hidden');
@@ -499,8 +538,10 @@
                 this.dom.confirmModal.classList.add('hidden');
             });
 
-            this.dom.btnPdf.addEventListener('click', () => this.handlePdfExport());
-
+            // Protegemos el botón de PDF (Asegúrate de que el nombre coincida)
+            if (this.dom.btnPdf) {
+                this.dom.btnPdf.addEventListener('click', () => this.handlePdfExport());
+            }
             document.querySelectorAll('.btn-graph-type').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const target = e.target.closest('[data-type]');
@@ -600,7 +641,7 @@
                     : '—';
 
                 const tr = document.createElement('tr');
-                tr.className = 'table-row-hover group';
+                tr.className = 'table-row-hover group'; 
                 tr.dataset.id   = g.id;
                 tr.dataset.prog = g.CODI_PROG;
                 tr.dataset.econ = g.CODI_ECON;
@@ -743,7 +784,7 @@
             this.loadData();
         },
 
-        openModal(row) {
+    openModal(row) {
             const f = this.dom.inputsForm;
             this.clearErrors();
 
@@ -757,13 +798,34 @@
                 f.c26.value  = row.dataset.c26;
                 f.var.value  = row.dataset.var;
 
-                this.dom.btnEliminar.classList.remove('hidden');
-                this.dom.modalTitle.textContent = 'Editar Gasto Presupuestario';
+                if (this.dom.btnEliminar) {
+                    this.dom.btnEliminar.classList.remove('hidden');
+                }
+                
+                this.dom.modalTitle.textContent = this.isAuthenticated 
+                    ? 'Editar Gasto Presupuestario' 
+                    : 'Detalle del Gasto Presupuestario';
+                    
             } else {
                 f.id.value = '';
                 this.dom.formEditar.reset();
-                this.dom.btnEliminar.classList.add('hidden');
+                
+                if (this.dom.btnEliminar) {
+                    this.dom.btnEliminar.classList.add('hidden');
+                }
                 this.dom.modalTitle.textContent = 'Nuevo Gasto Presupuestario';
+            }
+
+            // AÑADE ESTE BLOQUE NUEVO AQUÍ:
+            // Si no está autenticado, hacemos que los campos sean de solo lectura y parezcan inactivos
+            if (!this.isAuthenticated) {
+                Object.values(f).forEach(input => {
+                    if (input && input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') {
+                        input.readOnly = true;
+                        input.classList.add('bg-gray-50', 'cursor-not-allowed', 'border-transparent');
+                        input.classList.remove('focus:ring-2', 'focus:ring-sky-300'); // Quitamos el brillo al hacer clic
+                    }
+                });
             }
 
             this.renderModalChart();
