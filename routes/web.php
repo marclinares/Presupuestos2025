@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GastoPresupuestoController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/gastos/{id}', [GastoPresupuestoController::class, 'update']);
     Route::delete('/gastos/{id}', [GastoPresupuestoController::class, 'destroy']);
 
+});
+
+// Solo usuarios con rol admin pueden gestionar usuarios
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/usuarios/nuevo', [UserController::class, 'create'])->name('users.create');
+    Route::post('/admin/usuarios', [UserController::class, 'store'])->name('users.store');
 });
 
 

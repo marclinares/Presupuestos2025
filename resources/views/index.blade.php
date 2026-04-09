@@ -88,7 +88,7 @@
                 <p class="text-sm text-gray-600">Gestión Presupuestaria 2026</p>
             </div>
         </div>
-        <div class="flex flex-wrap gap-4">
+        <div class="flex flex-wrap gap-4 items-center">
             @guest
             <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-xl bg-white border-2 border-blue-500 text-blue-600 font-bold hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 shadow-sm">
                 <i class="fas fa-user-lock"></i> Acceso Admin
@@ -96,16 +96,22 @@
             @endguest
 
             @auth
-            <form method="POST" action="{{ route('logout') }}" class="inline">
-                @csrf
-                <button type="submit" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 shadow-sm border border-gray-200">
-                    <i class="fas fa-sign-out-alt"></i> Salir ({{ auth()->user()->name }})
-                </button>
-            </form>
+                @can('manage-users')
+                <a href="{{ route('users.create') }}" class="px-5 py-2.5 rounded-xl bg-[#00569d] text-white font-bold hover:bg-[#00447c] transition-all duration-300 flex items-center gap-2 shadow-lg shadow-blue-900/20">
+                    <i class="fas fa-user-plus"></i> Gestionar Usuarios
+                </a>
+                @endcan
 
-            <button id="btn-nuevo" class="btn-primary">
-                <i class="fas fa-plus"></i> Nuevo Presupuesto
-            </button>
+                <button id="btn-nuevo" class="btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Presupuesto
+                </button>
+
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 shadow-sm border border-gray-200">
+                        <i class="fas fa-sign-out-alt"></i> Salir ({{ auth()->user()->name }})
+                    </button>
+                </form>
             @endauth
 
             <button id="btn-download-pdf" class="px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 hover:border-blue-300 transition-all duration-300 flex items-center gap-2 shadow-sm">
@@ -113,6 +119,15 @@
             </button>
         </div>
     </header>
+
+    @if (session('status'))
+        <div class="max-w-7xl mx-auto mt-6 px-6">
+            <div class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-xl shadow-sm flex items-center gap-3">
+                <i class="fas fa-check-circle"></i>
+                <span class="font-bold">{{ session('status') }}</span>
+            </div>
+        </div>
+    @endif
 
     <div class="text-center mb-12 animate-fadeIn" style="animation-delay:0.1s">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
