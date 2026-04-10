@@ -799,11 +799,20 @@
             this.loadData();
         },
 
-    openModal(row) {
+        openModal(row) {
             const f = this.dom.inputsForm;
             this.clearErrors();
 
+            // 1. POR DEFECTO: Desbloqueamos todo (Preparando para Modo Creación)
+            if (this.isAuthenticated) {
+                [f.prog, f.econ, f.app, f.c24, f.c25, f.c26].forEach(input => {
+                    input.readOnly = false;
+                    input.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+                });
+            }
+
             if (row) {
+                // --- MODO EDICIÓN ---
                 f.id.value   = row.dataset.id;
                 f.prog.value = row.dataset.prog;
                 f.econ.value = row.dataset.econ;
@@ -821,7 +830,18 @@
                     ? 'Editar Gasto Presupuestario' 
                     : 'Detalle del Gasto Presupuestario';
                     
+                // 2. BLOQUEO ESPECÍFICO: Si es admin y está editando, bloqueamos 2024 y 2025
+                if (this.isAuthenticated) {
+                    [f.c24, f.c25].forEach(input => {
+                        input.readOnly = true;
+                        input.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+                        // Opcional: title para que al pasar el ratón sepa por qué no puede escribir
+                        input.title = "Solo se puede modificar el presupuesto del año vigente (2026)";
+                    });
+                }
+                    
             } else {
+                // --- MODO CREACIÓN ---
                 f.id.value = '';
                 this.dom.formEditar.reset();
                 
@@ -831,14 +851,14 @@
                 this.dom.modalTitle.textContent = 'Nuevo Gasto Presupuestario';
             }
 
-            // AÑADE ESTE BLOQUE NUEVO AQUÍ:
-            // Si no está autenticado, hacemos que los campos sean de solo lectura y parezcan inactivos
+            // --- MODO INVITADO ---
+            // Si no está autenticado, hacemos que TODOS los campos sean de solo lectura
             if (!this.isAuthenticated) {
                 Object.values(f).forEach(input => {
-                    if (input && input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') {
+                    if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA')) {
                         input.readOnly = true;
                         input.classList.add('bg-gray-50', 'cursor-not-allowed', 'border-transparent');
-                        input.classList.remove('focus:ring-2', 'focus:ring-sky-300'); // Quitamos el brillo al hacer clic
+                        input.classList.remove('focus:ring-2', 'focus:ring-sky-300');
                     }
                 });
             }

@@ -19,6 +19,7 @@ class GastoPresupuesto extends Model
         'APLICACION_PRESUPUESTARIA',
         'CR_INIC_2024',
         'CR_INIC_2025',
+        'CR_INIC_2026',
         'VARIACION',
     ];
 }
