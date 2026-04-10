@@ -370,6 +370,18 @@
                     @endauth
                 </div>
             </form>
+            <div id="historial-container" class="mt-6 pt-6 border-t-2 border-dashed border-gray-100 hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-md font-bold text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-history text-sky-500"></i> 
+                        Registro de cambios (Presupuesto 2026)
+                    </h3>
+                    <span class="text-xs font-medium px-2 py-1 bg-sky-50 text-sky-600 rounded-full">Historial</span>
+                </div>
+                
+                <div id="historial-content" class="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    </div>
+            </div>
         </div>
     </div>
 </div>
@@ -468,6 +480,8 @@
                 },
                 csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             };
+            this.dom.historialContainer = document.getElementById('historial-container');
+            this.dom.historialContent = document.getElementById('historial-content');
         },
 
         bindEvents() {
@@ -717,6 +731,59 @@
             });
         },
 
+        async fetchHistorial(id) {
+            if (!this.dom.historialContainer) return;
+
+            try {
+                const response = await fetch(`/gastos/${id}/historial`);
+                const logs = await response.json();
+
+                if (logs.length > 0) {
+                    this.dom.historialContainer.classList.remove('hidden');
+                    this.renderHistorial(logs);
+                }
+            } catch (error) {
+                console.error("Error cargando historial:", error);
+            }
+        },
+
+        renderHistorial(logs) {
+            this.dom.historialContent.innerHTML = logs.map(log => {
+                const fecha = new Date(log.fecha_cambio).toLocaleString('es-ES', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                const diferencia = parseFloat(log.diferencia);
+                const colorClase = diferencia >= 0 ? 'text-emerald-600' : 'text-red-600';
+                const icono = diferencia >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+
+                return `
+                    <div class="bg-white border border-gray-100 p-3 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 text-xs font-bold">
+                                    ${log.usuario.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">${log.usuario}</p>
+                                    <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">${fecha}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-400 line-through">${this.formatMoney(log.importe_anterior)}</p>
+                                <p class="text-sm font-black text-gray-900">${this.formatMoney(log.importe_nuevo)}</p>
+                                <p class="text-xs font-bold ${colorClase} flex items-center justify-end gap-1">
+                                    <i class="fas ${icono} text-[10px]"></i>
+                                    ${diferencia >= 0 ? '+' : ''}${this.formatMoney(diferencia)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        },
+
         renderPagination(current, last) {
             if (last <= 1) {
                 this.dom.paginacion.innerHTML = '';
@@ -803,6 +870,12 @@
             const f = this.dom.inputsForm;
             this.clearErrors();
 
+            // Resetear el contenedor del historial
+            if (this.dom.historialContainer) {
+                this.dom.historialContainer.classList.add('hidden');
+                this.dom.historialContent.innerHTML = '';
+            }
+
             // 1. POR DEFECTO: Desbloqueamos todo (Preparando para Modo Creación)
             if (this.isAuthenticated) {
                 [f.prog, f.econ, f.app, f.c24, f.c25, f.c26].forEach(input => {
@@ -812,6 +885,9 @@
             }
 
             if (row) {
+                if (this.isAuthenticated) {
+                    this.fetchHistorial(row.dataset.id);
+                }
                 // --- MODO EDICIÓN ---
                 f.id.value   = row.dataset.id;
                 f.prog.value = row.dataset.prog;
@@ -947,9 +1023,9 @@
                 CODI_PROG:                f.prog.value.trim(),
                 CODI_ECON:                f.econ.value.trim(),
                 APLICACION_PRESUPUESTARIA:f.app.value.trim(),
-                CR_INIC_2024:             parseFloat(f.c24.value) || 0,
-                CR_INIC_2025:             parseFloat(f.c25.value) || 0,
-                CR_INIC_2026:             parseFloat(f.c26.value) || 0,
+                CR_INIC_2024:             Math.round((parseFloat(f.c24.value) || 0) * 100) / 100,
+                CR_INIC_2025:             Math.round((parseFloat(f.c25.value) || 0) * 100) / 100,
+                CR_INIC_2026:             Math.round((parseFloat(f.c26.value) || 0) * 100) / 100,
                 VARIACION:                f.var.value.trim()
             };
 
@@ -1315,6 +1391,59 @@
             return str.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
         }
     };
+
+    function renderHistorial(g) {
+
+        const container = document.getElementById('historial-gasto');
+
+        if (!container) return;
+
+        if (!g.historial || g.historial.length === 0) {
+            container.innerHTML = `
+                <p class="text-sm text-gray-400 mt-4">
+                    No hay cambios registrados.
+                </p>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="border-t pt-4 mt-6">
+                <h3 class="font-bold text-gray-600 mb-3">
+                    📜 Historial de cambios
+                </h3>
+                <div class="space-y-2 max-h-52 overflow-y-auto">
+        `;
+
+        g.historial.forEach(h => {
+            html += `
+                <div class="flex justify-between bg-gray-50 p-2 rounded text-sm">
+                    <div>
+                        <strong>${h.usuario ?? 'Sistema'}</strong>
+                        <span class="text-xs text-gray-400 ml-2">
+                            ${new Date(h.fecha_cambio).toLocaleString()}
+                        </span>
+                    </div>
+
+                    <div>
+                        <span class="text-red-500">${h.importe_anterior} €</span>
+                        →
+                        <span class="text-green-600 font-bold">${h.importe_nuevo} €</span>
+
+                        <span class="ml-2 ${
+                            h.diferencia >= 0 ? 'text-green-600' : 'text-red-600'
+                        }">
+                            (${h.diferencia} €)
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div></div>`;
+
+        container.innerHTML = html;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         ExpenseManager.init();

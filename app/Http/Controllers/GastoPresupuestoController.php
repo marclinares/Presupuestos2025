@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\GastoPresupuesto;
 use PDF;
 use Illuminate\Support\Facades\DB;
+use App\Models\GastoHistorial;
+use Illuminate\Support\Facades\Auth;
 
 class GastoPresupuestoController extends Controller
 {
@@ -29,16 +31,19 @@ class GastoPresupuestoController extends Controller
 
     public function search(Request $request)
     {
-        $q = $request->input('q');
+        $q    = $request->input('q');
         $sort = $request->input('sort', 'id');
-        $dir = $request->input('dir', 'asc');
+        $dir  = $request->input('dir', 'asc');
 
-        $query = GastoPresupuesto::query();
+        // FIX 1: una sola query con with(), sin sobreescribir
+        $query = GastoPresupuesto::with('historial');
 
         if ($q) {
-            $query->where('CODI_PROG', 'like', "%{$q}%")
-                ->orWhere('CODI_ECON', 'like', "%{$q}%")
-                ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%");
+            $query->where(function ($sub) use ($q) {
+                $sub->where('CODI_PROG', 'like', "%{$q}%")
+                    ->orWhere('CODI_ECON', 'like', "%{$q}%")
+                    ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%");
+            });
         }
 
         $camposOrdenables = [
@@ -48,7 +53,7 @@ class GastoPresupuestoController extends Controller
             'CR_INIC_2024',
             'CR_INIC_2025',
             'CR_INIC_2026',
-            'VARIACION'
+            'VARIACION',
         ];
 
         if (in_array($sort, $camposOrdenables)) {
@@ -68,7 +73,7 @@ class GastoPresupuestoController extends Controller
             'CR_INIC_2024',
             'CR_INIC_2025',
             'CR_INIC_2026',
-            'VARIACION'
+            'VARIACION',
         ]));
 
         return response()->json(['message' => 'Creado', 'id' => $nuevo->id]);
@@ -79,15 +84,31 @@ class GastoPresupuestoController extends Controller
     {
         $gasto = GastoPresupuesto::findOrFail($id);
 
-        $gasto->CODI_PROG = $request->CODI_PROG;
-        $gasto->CODI_ECON = $request->CODI_ECON;
+        // Valor anterior redondeado a 2 decimales para comparación fiable
+        $anterior = round((float) $gasto->CR_INIC_2026, 2);
+        $nuevo    = round((float) $request->CR_INIC_2026, 2);
+
+        $gasto->CODI_PROG                 = $request->CODI_PROG;
+        $gasto->CODI_ECON                 = $request->CODI_ECON;
         $gasto->APLICACION_PRESUPUESTARIA = $request->APLICACION_PRESUPUESTARIA;
-        $gasto->CR_INIC_2024 = $request->CR_INIC_2024;
-        $gasto->CR_INIC_2025 = $request->CR_INIC_2025;
-        $gasto->CR_INIC_2026 = $request->CR_INIC_2026;
-        $gasto->VARIACION = $request->VARIACION;
+        $gasto->CR_INIC_2024              = $request->CR_INIC_2024;
+        $gasto->CR_INIC_2025              = $request->CR_INIC_2025;
+        $gasto->CR_INIC_2026              = $nuevo;
+        $gasto->VARIACION                 = $request->VARIACION;
 
         $gasto->save();
+
+        // FIX 2: comparación segura entre floats redondeados
+        if ($anterior !== $nuevo) {
+            GastoHistorial::create([
+                'gasto_id'         => $gasto->id,
+                'importe_anterior' => $anterior,
+                'importe_nuevo'    => $nuevo,
+                'diferencia'       => round($nuevo - $anterior, 2),
+                'usuario'          => Auth::user()->name ?? 'system',
+                'fecha_cambio'     => now(),
+            ]);
+        }
 
         return response()->json(['message' => 'Actualizado']);
     }
@@ -104,9 +125,9 @@ class GastoPresupuestoController extends Controller
 
     public function exportarPDF(Request $request)
     {
-        $q = $request->input('q', '');
+        $q    = $request->input('q', '');
         $sort = $request->input('sort') ?: 'CODI_PROG';
-        $dir  = $request->input('dir') ?: 'asc';
+        $dir  = $request->input('dir')  ?: 'asc';
 
         $camposOrdenables = [
             'CODI_PROG',
@@ -115,24 +136,24 @@ class GastoPresupuestoController extends Controller
             'CR_INIC_2024',
             'CR_INIC_2025',
             'CR_INIC_2026',
-            'VARIACION'
+            'VARIACION',
         ];
 
         if (!in_array($sort, $camposOrdenables)) {
             $sort = 'CODI_PROG';
         }
 
-        if (!in_array(strtolower($dir), ['asc','desc'])) {
+        if (!in_array(strtolower($dir), ['asc', 'desc'])) {
             $dir = 'asc';
         }
 
         $query = GastoPresupuesto::query();
 
         if ($q) {
-            $query->where(function($subquery) use ($q) {
+            $query->where(function ($subquery) use ($q) {
                 $subquery->where('CODI_PROG', 'like', "%{$q}%")
-                        ->orWhere('CODI_ECON', 'like', "%{$q}%")
-                        ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%");
+                         ->orWhere('CODI_ECON', 'like', "%{$q}%")
+                         ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%");
             });
         }
 
@@ -158,7 +179,7 @@ class GastoPresupuestoController extends Controller
         $query = GastoPresupuesto::query();
 
         if ($q) {
-            $query->where(function($sub) use ($q) {
+            $query->where(function ($sub) use ($q) {
                 $sub->where('CODI_PROG', 'like', "%{$q}%")
                     ->orWhere('CODI_ECON', 'like', "%{$q}%")
                     ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%");
@@ -176,7 +197,6 @@ class GastoPresupuestoController extends Controller
             ->orderBy('total_2026', 'desc')
             ->get();
 
-
         $porEconomico = (clone $query)
             ->select(
                 'CODI_ECON as codigo_economico',
@@ -188,10 +208,9 @@ class GastoPresupuestoController extends Controller
             ->orderBy('total_2026', 'desc')
             ->get();
 
-
         return response()->json([
-            'porPrograma' => $porPrograma,
-            'porEconomico' => $porEconomico
+            'porPrograma'  => $porPrograma,
+            'porEconomico' => $porEconomico,
         ]);
     }
 
@@ -202,9 +221,11 @@ class GastoPresupuestoController extends Controller
 
         if ($request->has('q')) {
             $q = $request->input('q');
-            $query->where('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%")
-                ->orWhere('CODI_ECON', 'like', "%{$q}%")
-                ->orWhere('CODI_PROG', 'like', "%{$q}%");
+            $query->where(function ($sub) use ($q) {
+                $sub->where('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%")
+                    ->orWhere('CODI_ECON', 'like', "%{$q}%")
+                    ->orWhere('CODI_PROG', 'like', "%{$q}%");
+            });
         }
 
         $datos = $query
@@ -228,9 +249,11 @@ class GastoPresupuestoController extends Controller
 
         if ($request->has('q')) {
             $q = $request->input('q');
-            $query->where('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%")
-                ->orWhere('CODI_ECON', 'like', "%{$q}%")
-                ->orWhere('CODI_PROG', 'like', "%{$q}%");
+            $query->where(function ($sub) use ($q) {
+                $sub->where('APLICACION_PRESUPUESTARIA', 'like', "%{$q}%")
+                    ->orWhere('CODI_ECON', 'like', "%{$q}%")
+                    ->orWhere('CODI_PROG', 'like', "%{$q}%");
+            });
         }
 
         $datos = $query
@@ -247,4 +270,13 @@ class GastoPresupuestoController extends Controller
         return response()->json($datos);
     }
 
+
+    public function getHistorial($id)
+    {
+        $historial = GastoHistorial::where('gasto_id', $id)
+                                   ->orderBy('fecha_cambio', 'desc')
+                                   ->get();
+
+        return response()->json($historial);
+    }
 }

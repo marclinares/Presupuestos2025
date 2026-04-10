@@ -45,6 +45,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/usuarios', [UserController::class, 'store'])->name('users.store');
 });
 
+Route::get('/gastos/{id}/historial', [App\Http\Controllers\GastoPresupuestoController::class, 'getHistorial']);
+
 
 // Rutas de autenticación Laravel Breeze
 require __DIR__.'/auth.php';

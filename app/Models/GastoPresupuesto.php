@@ -22,4 +22,9 @@ class GastoPresupuesto extends Model
         'CR_INIC_2026',
         'VARIACION',
     ];
+
+    public function historial()
+    {
+        return $this->hasMany(GastoHistorial::class, 'gasto_id');
+    }
 }
