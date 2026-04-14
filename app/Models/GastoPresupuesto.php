@@ -21,10 +21,17 @@ class GastoPresupuesto extends Model
         'CR_INIC_2025',
         'CR_INIC_2026',
         'VARIACION',
+        'titulo_programa_id',
     ];
 
     public function historial()
     {
         return $this->hasMany(GastoHistorial::class, 'gasto_id');
     }
+
+    public function tituloPrograma()
+    {
+        return $this->belongsTo(TituloPrograma::class, 'titulo_programa_id');
+    }
+
 }

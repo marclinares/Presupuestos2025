@@ -338,6 +338,20 @@
                            aria-label="Variación calculada automáticamente">
                 </div>
 
+                <div>
+                    <label class="font-semibold">Título Programa</label>
+                    <select id="titulo_programa_id" class="input-std">
+                    <option value="">SELECCIONAR</option>
+
+                    @foreach($titulos as $titulo)
+                        <option value="{{ $titulo->id }}">
+                        {{ $titulo->titulo }}
+                        </option>
+                    @endforeach
+
+                    </select>
+                </div>
+
                 <div class="mt-6 p-5 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-200">
                     <div class="flex flex-wrap justify-between items-center mb-4">
                         <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -409,7 +423,6 @@
 <script>
     const ExpenseManager = {
 
-        // Añade esta línea para que JS sepa si es admin o invitado
         isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
 
         state: {
@@ -429,10 +442,8 @@
         },
 
         dom: {
-            // ... otros elementos
-            btnNuevo: document.getElementById('btn-nuevo'), // Esto será null para invitados
+            btnNuevo: document.getElementById('btn-nuevo'), 
             btnDownloadPdf: document.getElementById('btn-download-pdf'),
-            // ...
         },
 
         init() {
@@ -470,6 +481,7 @@
                     c25:  document.getElementById('CR_INIC_2025'),
                     c26:  document.getElementById('CR_INIC_2026'),
                     var:  document.getElementById('VARIACION'),
+                    titulo: document.getElementById('titulo_programa_id'), // AÑADIDO
                 },
                 errors: {
                     prog: document.getElementById('err-prog'),
@@ -537,7 +549,6 @@
                 }
             });
 
-            // SOLO si el botón existe (estás logueado), se asigna el evento
             if (this.dom.btnNuevo) {
                 this.dom.btnNuevo.addEventListener('click', () => this.openModal(null));
             }
@@ -550,11 +561,9 @@
                 if (e.target === this.dom.modal) this.closeModal();
             });
 
-            // Protegemos el submit del formulario
             if (this.dom.formEditar) {
                 this.dom.formEditar.addEventListener('submit', (e) => this.handleSave(e));
             }
-            // Solo añadimos el evento si el botón existe en el DOM
             if (this.dom.btnEliminar) {
                 this.dom.btnEliminar.addEventListener('click', () => this.showConfirmModal());
             }
@@ -567,7 +576,6 @@
                 this.dom.confirmModal.classList.add('hidden');
             });
 
-            // Protegemos el botón de PDF (Asegúrate de que el nombre coincida)
             if (this.dom.btnPdf) {
                 this.dom.btnPdf.addEventListener('click', () => this.handlePdfExport());
             }
@@ -679,6 +687,8 @@
                 tr.dataset.c25  = g.CR_INIC_2025;
                 tr.dataset.c26  = g.CR_INIC_2026;
                 tr.dataset.var  = g.VARIACION ?? '';
+                tr.dataset.titulo = g.titulo_programa_id ?? ''; // AÑADIDO
+
                 tr.setAttribute('tabindex', '0');
                 tr.setAttribute('role', 'button');
                 tr.setAttribute('aria-label', `Editar gasto ${g.CODI_PROG}`);
@@ -870,16 +880,17 @@
             const f = this.dom.inputsForm;
             this.clearErrors();
 
-            // Resetear el contenedor del historial
             if (this.dom.historialContainer) {
                 this.dom.historialContainer.classList.add('hidden');
                 this.dom.historialContent.innerHTML = '';
             }
 
-            // 1. POR DEFECTO: Desbloqueamos todo (Preparando para Modo Creación)
+            // Desbloqueo inicial
             if (this.isAuthenticated) {
-                [f.prog, f.econ, f.app, f.c24, f.c25, f.c26].forEach(input => {
+                // AÑADIDO f.titulo
+                [f.prog, f.econ, f.app, f.c24, f.c25, f.c26, f.titulo].forEach(input => {
                     input.readOnly = false;
+                    input.disabled = false; // AÑADIDO para el select
                     input.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
                 });
             }
@@ -888,7 +899,7 @@
                 if (this.isAuthenticated) {
                     this.fetchHistorial(row.dataset.id);
                 }
-                // --- MODO EDICIÓN ---
+                
                 f.id.value   = row.dataset.id;
                 f.prog.value = row.dataset.prog;
                 f.econ.value = row.dataset.econ;
@@ -897,6 +908,7 @@
                 f.c25.value  = row.dataset.c25;
                 f.c26.value  = row.dataset.c26;
                 f.var.value  = row.dataset.var;
+                f.titulo.value = row.dataset.titulo; // AÑADIDO
 
                 if (this.dom.btnEliminar) {
                     this.dom.btnEliminar.classList.remove('hidden');
@@ -906,19 +918,18 @@
                     ? 'Editar Gasto Presupuestario' 
                     : 'Detalle del Gasto Presupuestario';
                     
-                // 2. BLOQUEO ESPECÍFICO: Si es admin y está editando, bloqueamos 2024 y 2025
                 if (this.isAuthenticated) {
                     [f.c24, f.c25].forEach(input => {
                         input.readOnly = true;
                         input.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
-                        // Opcional: title para que al pasar el ratón sepa por qué no puede escribir
                         input.title = "Solo se puede modificar el presupuesto del año vigente (2026)";
                     });
                 }
                     
             } else {
-                // --- MODO CREACIÓN ---
+                // MODO CREACIÓN
                 f.id.value = '';
+                f.titulo.value = ''; // AÑADIDO
                 this.dom.formEditar.reset();
                 
                 if (this.dom.btnEliminar) {
@@ -927,12 +938,13 @@
                 this.dom.modalTitle.textContent = 'Nuevo Gasto Presupuestario';
             }
 
-            // --- MODO INVITADO ---
-            // Si no está autenticado, hacemos que TODOS los campos sean de solo lectura
+            // MODO INVITADO
             if (!this.isAuthenticated) {
                 Object.values(f).forEach(input => {
-                    if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA')) {
+                    // AÑADIDO input.tagName === 'SELECT'
+                    if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA' || input.tagName === 'SELECT')) {
                         input.readOnly = true;
+                        input.disabled = true; // AÑADIDO para el select
                         input.classList.add('bg-gray-50', 'cursor-not-allowed', 'border-transparent');
                         input.classList.remove('focus:ring-2', 'focus:ring-sky-300');
                     }
@@ -1026,7 +1038,8 @@
                 CR_INIC_2024:             Math.round((parseFloat(f.c24.value) || 0) * 100) / 100,
                 CR_INIC_2025:             Math.round((parseFloat(f.c25.value) || 0) * 100) / 100,
                 CR_INIC_2026:             Math.round((parseFloat(f.c26.value) || 0) * 100) / 100,
-                VARIACION:                f.var.value.trim()
+                VARIACION:                f.var.value.trim(),
+                titulo_programa_id:       f.titulo.value || null // AÑADIDO
             };
 
             try {
@@ -1083,7 +1096,6 @@
             const params = `q=${encodeURIComponent(this.state.search)}&sort=${this.state.sortCampo}&dir=${this.state.sortDireccion}`;
 
             try {
-                // Peticiones simultáneas al backend
                 const [progRes, econRes] = await Promise.all([
                     fetch(`/gastos/chart-data/programa?${params}`),
                     fetch(`/gastos/chart-data/economico?${params}`)
@@ -1092,18 +1104,16 @@
                 const progData = await progRes.json();
                 const econData = await econRes.json();
 
-                // Transformar datos al formato { label, value } para los gráficos
                 const progChart = progData.map(item => ({
                     label: item.codigo_programa,
-                    total: item.total_2026  // <--- Forzamos que 'total' sea el valor de 2026
+                    total: item.total_2026 
                 }));
 
                 const econChart = econData.map(item => ({
                     label: item.codigo_economico,
-                    total: item.total_2026  // <--- Forzamos que 'total' sea el valor de 2026
+                    total: item.total_2026  
                 }));
 
-                // Pasar el "total" como clave
                 this.renderMainChart('graficoPrograma', progChart, 'label', 'mainPrograma');
                 this.renderMainChart('graficoEconomico', econChart, 'label', 'mainEconomico');
 

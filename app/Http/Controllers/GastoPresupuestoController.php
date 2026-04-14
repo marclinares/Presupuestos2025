@@ -8,24 +8,28 @@ use PDF;
 use Illuminate\Support\Facades\DB;
 use App\Models\GastoHistorial;
 use Illuminate\Support\Facades\Auth;
+use App\Models\TituloPrograma;
 
 class GastoPresupuestoController extends Controller
 {
+
     public function index(Request $request)
     {
         $search = $request->input('q');
 
-        $query = GastoPresupuesto::query();
+        $query = GastoPresupuesto::with('tituloPrograma');
 
         if ($search) {
             $query->where('CODI_PROG', 'like', "%{$search}%")
-                  ->orWhere('CODI_ECON', 'like', "%{$search}%")
-                  ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$search}%");
+                ->orWhere('CODI_ECON', 'like', "%{$search}%")
+                ->orWhere('APLICACION_PRESUPUESTARIA', 'like', "%{$search}%");
         }
 
         $resultados = $query->paginate(20);
 
-        return view('index', compact('resultados', 'search'));
+        $titulos = TituloPrograma::orderBy('titulo')->get();
+
+        return view('index', compact('resultados', 'search', 'titulos'));
     }
 
 
@@ -74,6 +78,7 @@ class GastoPresupuestoController extends Controller
             'CR_INIC_2025',
             'CR_INIC_2026',
             'VARIACION',
+            'titulo_programa_id',
         ]));
 
         return response()->json(['message' => 'Creado', 'id' => $nuevo->id]);
@@ -95,6 +100,7 @@ class GastoPresupuestoController extends Controller
         $gasto->CR_INIC_2025              = $request->CR_INIC_2025;
         $gasto->CR_INIC_2026              = $nuevo;
         $gasto->VARIACION                 = $request->VARIACION;
+        $gasto->titulo_programa_id       = $request->titulo_programa_id;    
 
         $gasto->save();
 
